@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极性轨迹 · 离线退磁工作台</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">↯</span>
+    <h1>极性轨迹</h1>
+    <span class="subtitle">离线退磁主分量分析工作台</span>
+  </div>
+  <div class="toolbar">
+    <label class="frame-pick">坐标帧
+      <select id="frame-select">
+        <option value="M">M 测量系</option>
+        <option value="G" selected>G 地理系</option>
+        <option value="T">T 倾斜校正系</option>
+      </select>
+    </label>
+    <button id="btn-rotations" class="ghost">导出旋转矩阵</button>
+    <button id="btn-runlog" class="ghost">运行记录</button>
+    <button id="btn-reseed" class="ghost">重新导入 fixture</button>
+    <button id="btn-reset" class="danger">清空数据库</button>
+  </div>
+</header>
+
+<main>
+  <aside class="sidebar">
+    <h2>定向标本</h2>
+    <div id="specimen-list" class="specimen-list">加载中…</div>
+    <section class="specimen-meta" id="specimen-meta"></section>
+    <section class="convention">
+      <h3>坐标口径</h3>
+      <p>右手系 X 北 / Y 东 / Z 下；D 自北顺时针，I 向下为正。
+         正角度沿命名轴符合右手定则。M→G = Rz(走向)·Ry(−倾伏)；
+         G→T 绕走向轴反倾伏角旋转。</p>
+    </section>
+  </aside>
+
+  <section class="content">
+    <div class="plots">
+      <div class="card plot-card">
+        <div class="card-head">
+          <h2>Zijderveld 投影</h2>
+          <div class="legend">
+            <span><i class="dot h"></i>水平面 N–E</span>
+            <span><i class="dot v"></i>铅直面 N–下</span>
+            <span><i class="dot x"></i>排除级</span>
+            <span><i class="line fit"></i>PCA 轴</span>
+          </div>
+        </div>
+        <div id="zij-plot" class="plot"></div>
+      </div>
+      <div class="card plot-card">
+        <div class="card-head">
+          <h2>等面积球坐标（下半球）</h2>
+          <div class="legend">
+            <span><i class="dot dir"></i>PCA 方向</span>
+            <span><i class="ring a95"></i>α95</span>
+          </div>
+        </div>
+        <div id="stereo-plot" class="plot"></div>
+      </div>
+    </div>
+
+    <div class="card controls">
+      <div class="card-head"><h2>处理窗与拟合</h2></div>
+      <div class="control-grid">
+        <label>处理方式
+          <select id="inp-treatment"><option value="AF">AF 交流</option><option value="TH">TH 热</option></select>
+        </label>
+        <label>起始级
+          <input id="inp-from" type="number" step="any" placeholder="如 20">
+        </label>
+        <label>结束级
+          <input id="inp-to" type="number" step="any" placeholder="如 60">
+        </label>
+        <label class="check"><input type="checkbox" id="inp-anchor"> 原点约束</label>
+        <label>加权
+          <select id="inp-weight">
+            <option value="uniform">等权</option>
+            <option value="inverse_variance">逆方差（1/trΣ）</option>
+          </select>
+        </label>
+        <label>bootstrap 种子
+          <input id="inp-seed" type="number" value="42">
+        </label>
+        <label class="grow">备注
+          <input id="inp-note" type="text" placeholder="候选窗说明（可选）">
+        </label>
+        <label class="grow">父候选
+          <select id="inp-parent"><option value="">（无）</option></select>
+        </label>
+        <button id="btn-fit" class="primary">计算候选窗</button>
+      </div>
+      <details class="explicit">
+        <summary>手动勾选级次（展开可精确指定；重复复测默认全部保留）</summary>
+        <div id="level-picker" class="level-picker"></div>
+      </details>
+    </div>
+
+    <div class="card candidates">
+      <div class="card-head">
+        <h2>候选窗口（并排保留，不把一次筛选当唯一解释）</h2>
+        <span id="cand-frame" class="tag"></span>
+      </div>
+      <div id="candidate-grid" class="candidate-grid"></div>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="modal hidden"><div class="modal-box">
+  <div class="modal-head"><h3 id="modal-title"></h3><button id="modal-close">×</button></div>
+  <pre id="modal-body"></pre>
+</div></div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/app.js"></script>
+</body>
+</html>

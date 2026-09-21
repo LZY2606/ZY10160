@@ -34,3 +34,9 @@ coverage/
 .vite/
 .turbo/
 *.tsbuildinfo
+
+# --- 本工作台本地运行产物 ---
+*.db
+*.db-shm
+*.db-wal
+polaritytrace.db*
