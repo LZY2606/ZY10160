@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>极性轨迹 · 退磁离线工作台</title>
+<link rel="stylesheet" href="/static/app.css"/>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">⇌</span>
+    <h1>极性轨迹</h1>
+    <span class="sub">逐级退磁分量检查 · 多窗并排 · 分层版本化</span>
+  </div>
+  <div class="actions">
+    <label>坐标系
+      <select id="frame">
+        <option value="spec">标本坐标 spec</option>
+        <option value="geo">地理坐标 geo (NED)</option>
+        <option value="tilt">倾斜校正 tilt</option>
+      </select>
+    </label>
+    <button id="btn-import" type="button">重新导入 fixture</button>
+    <button id="btn-reset" type="button" class="danger">清空数据库</button>
+    <a class="btn ghost" href="/api/runlog?download=1" target="_blank">导出运行记录</a>
+  </div>
+</header>
+
+<main>
+  <section class="panels">
+    <aside class="sidebar">
+      <h2>定向标本</h2>
+      <ul id="specimen-list" class="specimen-list"></ul>
+      <div class="hint">
+        <p>每个级次保留三分量矢量、测量协方差与装样姿态。重复处理强度是独立复测，不会被合并。</p>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <div id="empty" class="empty hidden">
+        点击「重新导入 fixture」载入三条验收轨迹。
+      </div>
+
+      <div id="detail" class="hidden">
+        <div class="spec-head">
+          <div>
+            <h2 id="spec-title"></h2>
+            <div id="spec-meta" class="spec-meta"></div>
+          </div>
+          <div class="plots">
+            <figure>
+              <img id="img-zij" alt="Zijderveld"/>
+              <figcaption>Zijderveld 正交投影</figcaption>
+            </figure>
+            <figure>
+              <img id="img-stereo" alt="stereonet"/>
+              <figcaption>等角度球面投影</figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="steps-block">
+          <h3>级次表 <span class="frame-tag" id="steps-frame"></span></h3>
+          <div class="table-wrap">
+            <table id="steps-table">
+              <thead>
+                <tr>
+                  <th>序</th><th>处理</th><th>X</th><th>Y</th><th>Z</th>
+                  <th>|m|</th><th>方位/倾</th><th>备注</th><th>排除</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="window-block">
+          <h3>新建候选处理窗</h3>
+          <div class="window-form">
+            <label>名称 <input id="w-label" placeholder="例如 300–560°C 特征分量"/></label>
+            <label>自级次
+              <select id="w-from"></select>
+            </label>
+            <label>至级次
+              <select id="w-to"></select>
+            </label>
+            <label>原点约束
+              <select id="w-origin">
+                <option value="free">自由直线 (free)</option>
+                <option value="anchored">过原点 (anchored)</option>
+              </select>
+            </label>
+            <label>加权
+              <select id="w-weight">
+                <option value="none">等权</option>
+                <option value="isotropic">协方差迹倒数</option>
+                <option value="mahalanobis">方向方差倒数</option>
+              </select>
+            </label>
+            <label>Bootstrap 种子 <input id="w-seed" type="number" value="1164"/></label>
+            <button id="btn-add-candidate" type="button" class="primary">加入候选（保留现有窗口）</button>
+          </div>
+          <p class="hint">窗内被手动勾选「排除」的级次会单独记录；参数每次修改都生成新的不可变计算版本。</p>
+        </div>
+
+        <div class="candidates-head">
+          <h3>候选窗口（并排保留，不取唯一解释）</h3>
+        </div>
+        <div id="candidates" class="candidates"></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<footer class="footer">
+  <span id="status"></span>
+  <span>Go · SQLite · HTTP · SVG ｜ 右手系、逆时针为角度正方向 ｜ 往返变换误差 &lt; 1e-12</span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
